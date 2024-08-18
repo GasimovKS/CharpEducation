@@ -2,13 +2,16 @@
 {
     public string NameBook;
     public string Author;
+    public string NameBook { get { return name; } }
+    public string Author { get { return author; } }
 
-
-    public Book(string NameBook, tring Author);
+    public Book(string name, tring author);
      { 
-     NameBook = "Муму"
-     Author = "Тургенев"
-      }}
-     
-Console.WriteLine(Book);
+      this.name = name;
+      this.author = author;
+      }
 
+
+public NewBook(string name) : this(name, "автор") { }
+public NewBook() : this("книга", "автор") { }
+}
