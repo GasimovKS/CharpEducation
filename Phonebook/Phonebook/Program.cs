@@ -1,155 +1,199 @@
-﻿namespace Task3_Phonebook
+﻿using System;
+using System.Collections.Generic;
+
+// Класс Abonent
+class Abonent
 {
-    internal class Program
+    public string Name { get; set; }
+    public string PhoneNumber { get; set; }
+
+    public Abonent(string name, string phoneNumber)
     {
+        Name = name;
+        PhoneNumber = phoneNumber;
+    }
+}
 
-        static void Main(string[] args)
-        {
-            ShowMenu();
-        }
-        /// <summary>
-        /// Пользовательское меню.
-        /// </summary>
-        private static void ShowMenu()
-        {
-            Console.WriteLine("Добро пожаловать в справочник абонентов.");
-            bool exitCase = false;
-            while (!exitCase)
-            {
-                PrintMenu();
-                switch (Console.ReadKey().Key)
-                {
-                    case ConsoleKey.D1:
-                    case ConsoleKey.NumPad1:
-                        PrintMessage("Добавление нового абонента", ConsoleColor.Green);
-                        AddAbonent();
-                        break;
-                    case ConsoleKey.D2:
-                    case ConsoleKey.NumPad2:
-                        PrintMessage("Удаление существующего абонента", ConsoleColor.Green);
-                        RemoveAbonent();
-                        break;
-                    case ConsoleKey.D3:
-                    case ConsoleKey.NumPad3:
-                        PrintMessage("Поиск в базе данных абонентов по номеру телефона", ConsoleColor.Green);
-                        SearchByNumber();
-                        break;
-                    case ConsoleKey.D4:
-                    case ConsoleKey.NumPad4:
-                        PrintMessage("Поиск в базе данных абонентов по имени", ConsoleColor.Green);
-                        SearchByName();
-                        break;
-                    case ConsoleKey.D5:
-                    case ConsoleKey.NumPad5:
-                        PrintMessage("Завершение работы с телефонной книгой", ConsoleColor.Green);
-                        var phoneBook = Phonebook.GetInstance();
-                        phoneBook.SavePhoneBook();
-                        exitCase = true;
-                        break;
-                    default:
-                        PrintMessage("Выбран не сущестующий пункт меню", ConsoleColor.Red);
-                        break;
-                }
-            }
-        }
+// Класс Phonebook (синглтон)
+class Phonebook
+{
+    private static Phonebook instance;
+    private List<Abonent> abonents;
 
-        /// <summary>
-        /// Вывод меню на консоль.
-        /// </summary>
-        private static void PrintMenu()
-        {
-            Console.WriteLine("Выбери пункт меню:");
-            Console.WriteLine("1. Добавить нового абонента.");
-            Console.WriteLine("2. Удалить абонента.");
-            Console.WriteLine("3. Поиск абонента по номеру телефона.");
-            Console.WriteLine("4. Поиск абонента по имени.");
-            Console.WriteLine("5. Выход.");
-        }
+    private Phonebook()
+    {
+        abonents = new List<Abonent>();
+    }
 
-        /// <summary>
-        /// Вывод текста на экран консоли с раскраской в определенный цвет.
-        /// </summary>
-        /// <param name="str">Строка символов для вывода в консоль.</param>
-        /// <param name="color">Цвет выводимого текста в консоль.</param>
-        /// <param name="needClearConsole">Требуется ли очистить окно консоли перед выводом сообщения.</param>
-        private static void PrintMessage(string str, ConsoleColor color, bool needClearConsole = true)
+    public static Phonebook GetInstance()
+    {
+        if (instance == null)
         {
-            if (needClearConsole)
-            {
-                Console.Clear();
-            }
-            Console.ForegroundColor = color;
-            Console.WriteLine(str);
-            Console.ResetColor();
+            instance = new Phonebook();
         }
+        return instance;
+    }
 
-        /// <summary>
-        /// Добавление нового абонента в справочник.
-        /// </summary>
-        private static void AddAbonent()
+    public void AddAbonent(string name, string phoneNumber)
+    {
+        abonents.Add(new Abonent(name, phoneNumber));
+    }
+
+    public void RemoveAbonent(string phoneNumber)
+    {
+        Abonent abonent = abonents.Find(a => a.PhoneNumber == phoneNumber);
+        if (abonent != null)
         {
-            var phoneBook = Phonebook.GetInstance();
-            Console.WriteLine("Введите имя нового абонента");
-            string name = Console.ReadLine();
-            if (name.Equals(""))
-            {
-                Console.WriteLine("Имя нового абонента не введено");
-                return;
-            }
-            Console.WriteLine("Введите номер нового абонента");
-            long number;
-            if (!long.TryParse(Console.ReadLine(), out number))
-            {
-                Console.WriteLine("Номер введен не верно");
-                return;
-            }
-            Console.WriteLine(phoneBook.AddAbonent(name, number));
+            abonents.Remove(abonent);
         }
+    }
 
-        /// <summary>
-        /// Удаление абонента из справочника.
-        /// </summary>
-        private static void RemoveAbonent()
+    public Abonent SearchAbonentByNumber(string phoneNumber)
+    {
+        return abonents.Find(a => a.PhoneNumber == phoneNumber);
+    }
+
+    public List<Abonent> SearchAbonentByName(string name)
+    {
+        return abonents.FindAll(a => a.Name == name);
+    }
+
+    public void SavePhoneBook()
+    {
+        // Логика сохранения справочника в файл или другое хранилище
+        Console.WriteLine("Справочник сохранен.");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        ShowMenu();
+    }
+
+    private static void ShowMenu()
+    {
+        Console.WriteLine("Добро пожаловать в справочник абонентов.");
+        bool exitCase = false;
+        while (!exitCase)
         {
-            var phoneBook = Phonebook.GetInstance();
-            Console.WriteLine("Введите номер абонента для удаления.");
-            if (long.TryParse(Console.ReadLine(), out long number))
+            PrintMenu();
+            switch (Console.ReadKey().Key)
             {
-                Console.WriteLine(phoneBook.RemoveAbonent(number));
-            }
-            else
-            {
-                Console.WriteLine("Номер введен не верно");
-                return;
+                case ConsoleKey.D1:
+                case ConsoleKey.NumPad1:
+                    PrintMessage("Добавление нового абонента", ConsoleColor.Green);
+                    AddAbonent();
+                    break;
+                case ConsoleKey.D2:
+                case ConsoleKey.NumPad2:
+                    PrintMessage("Удаление существующего абонента", ConsoleColor.Green);
+                    RemoveAbonent();
+                    break;
+                case ConsoleKey.D3:
+                case ConsoleKey.NumPad3:
+                    PrintMessage("Поиск в базе данных абонентов по номеру телефона", ConsoleColor.Green);
+                    SearchByNumber();
+                    break;
+                case ConsoleKey.D4:
+                case ConsoleKey.NumPad4:
+                    PrintMessage("Поиск в базе данных абонентов по имени", ConsoleColor.Green);
+                    SearchByName();
+                    break;
+                case ConsoleKey.D5:
+                case ConsoleKey.NumPad5:
+                    PrintMessage("Завершение работы с телефонной книгой", ConsoleColor.Green);
+                    var phoneBook = Phonebook.GetInstance();
+                    phoneBook.SavePhoneBook();
+                    exitCase = true;
+                    break;
+                default:
+                    PrintMessage("Выбран не существующий пункт меню", ConsoleColor.Red);
+                    break;
             }
         }
+    }
 
-        /// <summary>
-        /// Поиск абонента по номеру телефона
-        /// </summary>
-        private static void SearchByNumber()
+    private static void PrintMenu()
+    {
+        Console.WriteLine("Выберите пункт меню:");
+        Console.WriteLine("1. Добавить нового абонента.");
+        Console.WriteLine("2. Удалить абонента.");
+        Console.WriteLine("3. Поиск абонента по номеру телефона.");
+        Console.WriteLine("4. Поиск абонента по имени.");
+        Console.WriteLine("5. Выход.");
+    }
+
+    private static void PrintMessage(string str, ConsoleColor color, bool needClearConsole = true)
+    {
+        if (needClearConsole)
         {
-            var phoneBook = Phonebook.GetInstance();
-            Console.WriteLine("Введите номер абонента для поиска.");
-            if (long.TryParse(Console.ReadLine(), out long number))
+            Console.Clear();
+        }
+        Console.ForegroundColor = color;
+        Console.WriteLine(str);
+        Console.ResetColor();
+    }
+
+    private static void AddAbonent()
+    {
+        Console.WriteLine("Введите имя абонента:");
+        string name = Console.ReadLine();
+        Console.WriteLine("Введите номер телефона абонента:");
+        string phoneNumber = Console.ReadLine();
+
+        var phoneBook = Phonebook.GetInstance();
+        phoneBook.AddAbonent(name, phoneNumber);
+        PrintMessage($"Абонент {name} с номером {phoneNumber} успешно добавлен в справочник.", ConsoleColor.Yellow, needClearConsole: false);
+    }
+
+    private static void RemoveAbonent()
+    {
+        Console.WriteLine("Введите номер телефона абонента для удаления:");
+        string phoneNumber = Console.ReadLine();
+
+        var phoneBook = Phonebook.GetInstance();
+        phoneBook.RemoveAbonent(phoneNumber);
+        PrintMessage($"Абонент с номером {phoneNumber} успешно удален из справочника.", ConsoleColor.Yellow, needClearConsole: false);
+    }
+
+    private static void SearchByNumber()
+    {
+        Console.WriteLine("Введите номер телефона для поиска:");
+        string phoneNumber = Console.ReadLine();
+
+        var phoneBook = Phonebook.GetInstance();
+        var abonent = phoneBook.SearchAbonentByNumber(phoneNumber);
+
+        if (abonent != null)
+        {
+            PrintMessage($"Найден абонент: {abonent.Name}, Номер телефона: {abonent.PhoneNumber}", ConsoleColor.Yellow, needClearConsole: false);
+        }
+        else
+        {
+            PrintMessage("Абонент с указанным номером не найден.", ConsoleColor.Red, needClearConsole: false);
+        }
+    }
+
+    private static void SearchByName()
+    {
+        Console.WriteLine("Введите имя абонента для поиска:");
+        string name = Console.ReadLine();
+
+        var phoneBook = Phonebook.GetInstance();
+        var abonents = phoneBook.SearchAbonentByName(name);
+
+        if (abonents.Count > 0)
+        {
+            foreach (var abonent in abonents)
             {
-                Console.WriteLine(phoneBook.SearchAbonent(number));
-            }
-            else
-            {
-                Console.WriteLine("Номер введен не верно");
-                return;
+                PrintMessage($"Найден абонент: {abonent.Name}, Номер телефона: {abonent.PhoneNumber}", ConsoleColor.Yellow, needClearConsole: false);
             }
         }
-
-        /// <summary>
-        /// Поиск абонента по имени
-        /// </summary>
-        private static void SearchByName()
+        else
         {
-            var phoneBook = Phonebook.GetInstance();
-            Console.WriteLine("Введите имя абонента для поиска.");
-            Console.WriteLine(phoneBook.SearchAbonent(Console.ReadLine()));
+            PrintMessage("Абонент с указанным именем не найден.", ConsoleColor.Red, needClearConsole: false);
         }
     }
 }
